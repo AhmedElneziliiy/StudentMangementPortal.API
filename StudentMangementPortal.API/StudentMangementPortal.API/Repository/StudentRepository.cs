@@ -11,6 +11,12 @@ namespace StudentMangementPortal.API.Repository
             _context = context;
         }
 
+        public async Task<Student> GetStudentAsync(Guid studentId)
+        {
+            return await _context.Students
+                .Include(a => a.Gender).Include(s => s.Address).FirstOrDefaultAsync(s => s.Id == studentId);
+        }
+
         public async Task<List<Student>> GetStudentsAsync()
         {
             return await _context.Students.Include(a=>a.Gender).Include(s=>s.Address).ToListAsync();
