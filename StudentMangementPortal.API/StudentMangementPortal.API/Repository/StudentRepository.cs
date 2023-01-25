@@ -11,6 +11,16 @@ namespace StudentMangementPortal.API.Repository
             _context = context;
         }
 
+        public async Task<bool> Exists(Guid studentId)
+        {
+            return await _context.Students.AnyAsync(s=>s.Id==studentId);
+        }
+
+        public async Task<List<Gender>> GetGendersAsync()
+        {
+            return await _context.Genders.ToListAsync();
+        }
+
         public async Task<Student> GetStudentAsync(Guid studentId)
         {
             return await _context.Students
@@ -20,6 +30,26 @@ namespace StudentMangementPortal.API.Repository
         public async Task<List<Student>> GetStudentsAsync()
         {
             return await _context.Students.Include(a=>a.Gender).Include(s=>s.Address).ToListAsync();
+        }
+
+        public async Task<Student> UpdateStudentAsync(Guid id, Student request)
+        {
+          var student =  await GetStudentAsync(id);
+            if (student is not null)
+            {
+                student.FirstName = request.FirstName;
+                student.LastName = request.LastName;
+                student.DateOfBirth = request.DateOfBirth;
+                student.Email = request.Email;
+                student.Mobile = request.Mobile;
+                student.GenderId = request.GenderId;
+                student.Address.PhysicalAddress = request.Address.PhysicalAddress;
+                student.Address.PostalAddress = request.Address.PostalAddress;
+
+                await _context.SaveChangesAsync();
+                return student;
+            }
+            return null;
         }
     }
 }
