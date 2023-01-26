@@ -11,6 +11,19 @@ namespace StudentMangementPortal.API.Repository
             _context = context;
         }
 
+        public async Task<Student> DeleteStudent(Guid studentId)
+        {
+            var student=await GetStudentAsync(studentId);
+            if (student is not null)
+            {
+                _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+                return student;
+            }
+            return null;
+
+        }
+
         public async Task<bool> Exists(Guid studentId)
         {
             return await _context.Students.AnyAsync(s=>s.Id==studentId);
