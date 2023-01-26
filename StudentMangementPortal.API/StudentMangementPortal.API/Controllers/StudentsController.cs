@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StudentMangementPortal.API.Data.Models;
 using StudentMangementPortal.API.Domain.Models;
 using StudentMangementPortal.API.Repository;
@@ -13,10 +14,12 @@ namespace StudentMangementPortal.API.Controllers
     {
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
-        public StudentsController(IStudentRepository studentRepository, IMapper mapper)
+
+        public StudentsController( IStudentRepository studentRepository, IMapper mapper)
         {
             _studentRepository = studentRepository;
             _mapper = mapper;
+            
         }
 
         [HttpGet]
@@ -30,7 +33,7 @@ namespace StudentMangementPortal.API.Controllers
         
 
         [HttpGet]
-        [Route("[controller]/{studentId:guid}")]
+        [Route("[controller]/{studentId:guid}"),ActionName("GetStudentAsync")]
         public async Task<IActionResult> GetStudentAsync([FromRoute] Guid studentId)
         {
             // Fetch Student Details
@@ -72,6 +75,18 @@ namespace StudentMangementPortal.API.Controllers
                 return Ok(_mapper.Map<StudentDto>(student));
             }
             return NotFound();
+        }
+       
+        [HttpPost]
+        [Route("[controller]/Add")]
+        public async Task<IActionResult> AddStudentAsync([FromBody] AddStudentRequest request)
+        {
+            
+
+            var student = await _studentRepository.AddStudent(_mapper.Map<Student>(request));
+
+            return CreatedAtAction(nameof(GetStudentAsync), new { studentId = student.Id },
+                _mapper.Map<StudentDto>(student));
         }
     }
 }

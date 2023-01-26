@@ -11,9 +11,20 @@ namespace StudentMangementPortal.API.Repository
             _context = context;
         }
 
+        public async Task<Student> AddStudent(Student request)
+        {
+            var student = await _context.Students.AddAsync(request);
+            
+            
+
+
+            await _context.SaveChangesAsync();
+            return student.Entity;
+        }
+
         public async Task<Student> DeleteStudent(Guid studentId)
         {
-            var student=await GetStudentAsync(studentId);
+            var student = await GetStudentAsync(studentId);
             if (student is not null)
             {
                 _context.Students.Remove(student);
@@ -26,7 +37,7 @@ namespace StudentMangementPortal.API.Repository
 
         public async Task<bool> Exists(Guid studentId)
         {
-            return await _context.Students.AnyAsync(s=>s.Id==studentId);
+            return await _context.Students.AnyAsync(s => s.Id == studentId);
         }
 
         public async Task<List<Gender>> GetGendersAsync()
@@ -42,12 +53,12 @@ namespace StudentMangementPortal.API.Repository
 
         public async Task<List<Student>> GetStudentsAsync()
         {
-            return await _context.Students.Include(a=>a.Gender).Include(s=>s.Address).ToListAsync();
+            return await _context.Students.Include(a => a.Gender).Include(s => s.Address).ToListAsync();
         }
 
         public async Task<Student> UpdateStudentAsync(Guid id, Student request)
         {
-          var student =  await GetStudentAsync(id);
+            var student = await GetStudentAsync(id);
             if (student is not null)
             {
                 student.FirstName = request.FirstName;

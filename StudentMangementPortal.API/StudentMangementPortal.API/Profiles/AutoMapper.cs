@@ -2,6 +2,7 @@
 using StudentAdminPortal.API.Profiles.AfterMaps;
 using StudentMangementPortal.API.Data.Models;
 using StudentMangementPortal.API.Domain.Models;
+using StudentMangementPortal.API.Profiles.AfterMaps;
 
 namespace StudentMangementPortal.API.Profiles
 {
@@ -14,7 +15,9 @@ namespace StudentMangementPortal.API.Profiles
             CreateMap<Address, AddressDto>().ReverseMap();
             CreateMap<UpdateStudentRequest, Student>()
                 .AfterMap<UpdateStudentRequestAfterMap>();
-                ;
+
+            CreateMap<AddStudentRequest, Student>()
+                .AfterMap<AddStudentRequestAfterMap>();
         }
     }
 }

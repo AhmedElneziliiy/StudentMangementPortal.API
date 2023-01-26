@@ -2,15 +2,16 @@
 using StudentMangementPortal.API.Data.Models;
 using StudentMangementPortal.API.Domain.Models;
 
-
-namespace StudentAdminPortal.API.Profiles.AfterMaps
+namespace StudentMangementPortal.API.Profiles.AfterMaps
 {
-    public class UpdateStudentRequestAfterMap : IMappingAction<UpdateStudentRequest, Student>
+    public class AddStudentRequestAfterMap : IMappingAction<AddStudentRequest, Student>
     {
-        public void Process(UpdateStudentRequest source, Student destination, ResolutionContext context)
+        public void Process(AddStudentRequest source, Student destination, ResolutionContext context)
         {
+            destination.Id = Guid.NewGuid();
             destination.Address = new Address()
             {
+                Id = Guid.NewGuid(),
                 PhysicalAddress = source.PhysicalAddress,
                 PostalAddress = source.PostalAddress
             };
