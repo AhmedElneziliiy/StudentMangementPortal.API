@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using StudentMangementPortal.API.Data.Models;
 using StudentMangementPortal.API.Repository;
 
@@ -9,6 +11,8 @@ builder.Services.AddDbContext<StudentDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("StudentDb")));
 
 builder.Services.AddScoped<IStudentRepository,StudentRepository>();
+builder.Services.AddScoped<IImageRepository,ImageRepository>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("angularApplication", (builder) =>
@@ -34,6 +38,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions {
+    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath,"Resources")),
+    RequestPath= "/Resources"
+});
 app.UseCors("angularApplication");
 app.UseAuthorization();
 

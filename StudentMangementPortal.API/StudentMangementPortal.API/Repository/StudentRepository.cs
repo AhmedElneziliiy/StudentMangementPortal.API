@@ -14,10 +14,6 @@ namespace StudentMangementPortal.API.Repository
         public async Task<Student> AddStudent(Student request)
         {
             var student = await _context.Students.AddAsync(request);
-            
-            
-
-
             await _context.SaveChangesAsync();
             return student.Entity;
         }
@@ -54,6 +50,18 @@ namespace StudentMangementPortal.API.Repository
         public async Task<List<Student>> GetStudentsAsync()
         {
             return await _context.Students.Include(a => a.Gender).Include(s => s.Address).ToListAsync();
+        }
+
+        public async Task<bool> UpdateProfileImage(Guid studentId, string profileImageUrl)
+        {
+            var student=await GetStudentAsync(studentId);
+            if (student is not null)
+            {
+                student.ProfileImageUrl = profileImageUrl;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<Student> UpdateStudentAsync(Guid id, Student request)
