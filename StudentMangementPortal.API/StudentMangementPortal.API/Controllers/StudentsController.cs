@@ -8,7 +8,7 @@ using StudentMangementPortal.API.Repository;
 
 namespace StudentMangementPortal.API.Controllers
 {
-   
+
     [ApiController]
     public class StudentsController : ControllerBase
     {
@@ -16,7 +16,7 @@ namespace StudentMangementPortal.API.Controllers
         private readonly IMapper _mapper;
         private readonly IImageRepository _imageRepository;
 
-        public StudentsController( IStudentRepository studentRepository, IMapper mapper, IImageRepository imageRepository)
+        public StudentsController(IStudentRepository studentRepository, IMapper mapper, IImageRepository imageRepository)
         {
             _studentRepository = studentRepository;
             _mapper = mapper;
@@ -24,17 +24,17 @@ namespace StudentMangementPortal.API.Controllers
         }
 
         [HttpGet]
-       [Route("[controller]")]
+        [Route("[controller]")]
         public async Task<IActionResult> GetAllStudentsAsync()
         {
             var students = await _studentRepository.GetStudentsAsync();
 
             return Ok(_mapper.Map<List<StudentDto>>(students));
         }
-        
+
 
         [HttpGet]
-        [Route("[controller]/{studentId:guid}"),ActionName("GetStudentAsync")]
+        [Route("[controller]/{studentId:guid}"), ActionName("GetStudentAsync")]
         public async Task<IActionResult> GetStudentAsync([FromRoute] Guid studentId)
         {
             // Fetch Student Details
@@ -52,18 +52,18 @@ namespace StudentMangementPortal.API.Controllers
 
         [HttpPut]
         [Route("[controller]/{studentId:guid}")]
-        public async Task<IActionResult> UpdateStudentAsync([FromRoute] Guid studentId, [FromBody]UpdateStudentRequest request)
+        public async Task<IActionResult> UpdateStudentAsync([FromRoute] Guid studentId, [FromBody] UpdateStudentRequest request)
         {
-            if(await _studentRepository.Exists(studentId))
+            if (await _studentRepository.Exists(studentId))
             {
                 //
-               var updatedStudent= await _studentRepository.UpdateStudentAsync(studentId,_mapper.Map<Student>(request));
+                var updatedStudent = await _studentRepository.UpdateStudentAsync(studentId, _mapper.Map<Student>(request));
                 if (updatedStudent is not null)
                     return Ok(_mapper.Map<StudentDto>(updatedStudent));
             }
-              
+
             return NotFound();
-            
+
         }
 
         [HttpDelete]
@@ -72,17 +72,17 @@ namespace StudentMangementPortal.API.Controllers
         {
             if (await _studentRepository.Exists(studentId))
             {
-                var student=await _studentRepository.DeleteStudent(studentId);
+                var student = await _studentRepository.DeleteStudent(studentId);
                 return Ok(_mapper.Map<StudentDto>(student));
             }
             return NotFound();
         }
-       
+
         [HttpPost]
         [Route("[controller]/Add")]
         public async Task<IActionResult> AddStudentAsync([FromBody] AddStudentRequest request)
         {
-            
+
 
             var student = await _studentRepository.AddStudent(_mapper.Map<Student>(request));
 
@@ -92,18 +92,35 @@ namespace StudentMangementPortal.API.Controllers
 
         [HttpPost]
         [Route("[controller]/{studentId:guid}/upload-image")]
-        public async Task<IActionResult> UploadImage([FromRoute] Guid studentId,IFormFile profileImage)
+        public async Task<IActionResult> UploadImage([FromRoute] Guid studentId, IFormFile profileImage)
         {
-            if (await _studentRepository.Exists(studentId))
+            var validExtension = new List<string>
             {
-                var fileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
+                ".jpeg",
+                ".png",
+                ".jpg",
+                ".gif"
+            };
 
-                var path = await _imageRepository.Upload(profileImage, fileName);    
+            if (profileImage is not null && profileImage.Length>0)
+            {
+                var extension = Path.GetExtension(profileImage.FileName);
+                if (validExtension.Contains(extension))
+                {
 
-                if(await _studentRepository.UpdateProfileImage(studentId, path))
-                    return Ok(path);
+                    if (await _studentRepository.Exists(studentId))
+                    {
+                        var fileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
 
-                return StatusCode(StatusCodes.Status500InternalServerError,"Error while uploading (Image)");
+                        var path = await _imageRepository.Upload(profileImage, fileName);
+
+                        if (await _studentRepository.UpdateProfileImage(studentId, path))
+                            return Ok(path);
+
+                        return StatusCode(StatusCodes.Status500InternalServerError, "Error while uploading (Image)");
+                    }
+                }
+                return BadRequest("This is not valid image extension");
             }
             return NotFound();
         }
